@@ -178,7 +178,7 @@ You can also use Swagger UI to interact with the API.
 - MongoDB connection pooling is managed automatically.
 - All timestamps (`created_at`) are numeric UNIX epoch values in milliseconds.
 - Works seamlessly in both local and Vercel serverless environments.
-- Ensure your MongoDB cluster is accessible from your deployment region.
+- Ensure your MongoDB cluster is accessible from your deployment region and your environment variables are correctly set (for local development).
 
 ---
 
