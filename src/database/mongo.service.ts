@@ -34,6 +34,7 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async createClient(): Promise<MongoClient> {
+    if (this.client) return this.client;
     const uri = process.env.MONGODB_URI;
     if (!uri) {
       throw new Error(
@@ -41,9 +42,6 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
           'Provide it in .env or your deployment environment.',
       );
     }
-
-    if (this.client) return this.client;
-
     const client = new MongoClient(uri, MongoService.POOL_CONFIG);
     await client.connect();
     return client;
