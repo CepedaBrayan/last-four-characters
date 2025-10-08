@@ -1,6 +1,15 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateMaskDto, CreateMaskResponseDto } from './dto/create-mask.dto';
+import { GetMaskResponseDto } from './dto/get-mask.dto';
 import { MaskService } from './mask.service';
 
 @Controller('mask')
@@ -16,9 +25,40 @@ export class MaskController {
     description: 'The masked string',
     type: CreateMaskResponseDto,
   })
-  create(@Body() createMaskDto: CreateMaskDto): CreateMaskResponseDto {
-    return new CreateMaskResponseDto(
-      this.maskService.maskify(createMaskDto.chain),
+  async create(
+    @Body() createMaskDto: CreateMaskDto,
+    @Req() req: Request,
+  ): Promise<CreateMaskResponseDto> {
+    const ip =
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      'unknown-ip-address';
+    const originalChain = createMaskDto.chain;
+    const maskedChain = this.maskService.maskify(originalChain);
+
+    const insertedId = await this.maskService.saveMaskedChain(
+      ip,
+      originalChain,
+      maskedChain,
     );
+    return new CreateMaskResponseDto(originalChain, maskedChain, insertedId);
+  }
+
+  @Get(':insertedId')
+  @ApiOperation({
+    summary: 'Retrieve a masked record by its MongoDB insertedId',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The full record from MongoDB',
+    type: GetMaskResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Record not found' })
+  async findById(
+    @Param('insertedId') insertedId: string,
+  ): Promise<GetMaskResponseDto> {
+    const record = await this.maskService.findByInsertedId(insertedId);
+    if (!record)
+      throw new NotFoundException(`No record found with id: ${insertedId}`);
+    return record;
   }
 }
