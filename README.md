@@ -169,6 +169,8 @@ curl -X POST http://localhost:3000/mask   -H "Content-Type: application/json"   
 curl http://localhost:3000/mask/<insertedId>
 ```
 
+You can also use Swagger UI to interact with the API.
+![alt text](swagger-ss.png)
 ---
 
 ## Notes
@@ -176,7 +178,7 @@ curl http://localhost:3000/mask/<insertedId>
 - MongoDB connection pooling is managed automatically.
 - All timestamps (`created_at`) are numeric UNIX epoch values in milliseconds.
 - Works seamlessly in both local and Vercel serverless environments.
-- Ensure your MongoDB cluster is accessible from your deployment region.
+- Ensure your MongoDB cluster is accessible from your deployment region and your environment variables are correctly set (for local development).
 
 ---
 
