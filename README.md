@@ -1,98 +1,195 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Last-Four-Characters API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A lightweight and efficient **NestJS backend service** that masks all but the last four characters of any input string.  
+The application integrates with **MongoDB Atlas** for persistence and caching, and exposes interactive API documentation through **Swagger**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This service provides two main endpoints:
+1. `POST /mask` – Masks an input string and stores the result in MongoDB (cached to avoid recomputation).
+2. `GET /mask/{insertedId}` – Retrieves a previously masked record by its MongoDB identifier.
 
-## Project setup
+The system uses MongoDB as a caching layer. If the same input is submitted more than once, the service returns the same record identifier, demonstrating cache efficiency.
 
+---
+
+## Features
+
+- Mask any input string, leaving only the last four visible characters.
+- Cache previous computations in MongoDB to prevent redundant operations.
+- Consistent identifiers for identical input values.
+- Automatically generated API documentation via Swagger.
+- Connection pooling and error handling for database operations.
+- Deployable on [Vercel](https://vercel.com) using serverless functions.
+
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|--------|-------------|
+| Framework | [NestJS](https://nestjs.com) |
+| Language | TypeScript |
+| Database | MongoDB Atlas |
+| Deployment | Vercel (Serverless Functions) |
+| API Documentation | Swagger / OpenAPI |
+
+---
+
+## Local Setup
+
+### 1. Clone the Repository
 ```bash
-$ npm install
+git clone https://github.com/<your-username>/last-four-characters.git
+cd last-four-characters
 ```
 
-## Compile and run the project
-
+### 2. Install Dependencies
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
-
+### 3. Configure Environment Variables
+Copy the example file:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+Then edit `.env` with your MongoDB configuration:
+```env
+# .env
+ENV=local
+PORT=3000
+MONGODB_NAME=<your-database-name>
+MONGODB_URI=<your-mongodb-connection-string>
+MONGODB_MASK_COLLECTION=<your-collection-name>
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 4. Start the Application
+```bash
+npm run start:dev
+```
 
-## Resources
+Expected output:
+```
+Connected to MongoDB: <your-database-name>
+App running on port 3000
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## API Documentation (Swagger)
 
-## Support
+Once running locally, Swagger UI is available at:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+**http://localhost:3000/api**
 
-## Stay in touch
+This provides a fully interactive API interface where you can:
+- Test `POST /mask` and `GET /mask/{insertedId}` endpoints.
+- Review example requests and responses.
+- Inspect request validation rules and response schemas.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
+
+## Deployed API (Vercel)
+
+The production deployment is hosted on Vercel:
+
+**Base URL:**  
+[https://last-four-characters.vercel.app](https://last-four-characters.vercel.app)
+
+**Swagger UI:**  
+[https://last-four-characters.vercel.app/api](https://last-four-characters.vercel.app/api)
+
+### Example Requests
+
+#### 1. Create a Masked Record
+**POST** `/mask`
+```bash
+curl -X POST https://last-four-characters.vercel.app/mask   -H "Content-Type: application/json"   -d '{"chain":"4556364607935616"}'
+```
+
+**Response**
+```json
+{
+  "original": "4556364607935616",
+  "masked": "############5616",
+  "insertedId": "67068d5b2f79a8a72a0e16fb"
+}
+```
+
+If the same string is sent again, the same `insertedId` will be returned (cache hit).
+
+#### 2. Retrieve a Masked Record
+**GET** `/mask/{insertedId}`
+```bash
+curl https://last-four-characters.vercel.app/mask/67068d5b2f79a8a72a0e16fb
+```
+
+**Response**
+```json
+{
+  "internal_id": "1728402800000-6d8a5b97-f6d2-4e9e-b27d-c4a2c3de9ed3",
+  "ip": "181.51.78.203",
+  "original_chain": "4556364607935616",
+  "masked_chain": "############5616",
+  "created_at": 1728402800000
+}
+```
+
+If the record does not exist, a `404 Not Found` response is returned.
+
+---
+
+## API Flow Summary
+
+1. **POST /mask**
+   - Checks MongoDB for an existing record by `original_chain`.
+   - If found, returns the same `insertedId` (cache hit).
+   - If not found, creates and stores a new record with a timestamp.
+
+2. **GET /mask/{insertedId}**
+   - Queries MongoDB by ID.
+   - Returns the full record, excluding MongoDB’s internal `_id` field.
+
+---
+
+## Example Workflow
+
+```bash
+# Start local server
+npm run start:dev
+
+# Create a masked record
+curl -X POST http://localhost:3000/mask   -H "Content-Type: application/json"   -d '{"chain":"4556364607935616"}'
+
+# Repeat request (cache hit)
+curl -X POST http://localhost:3000/mask   -H "Content-Type: application/json"   -d '{"chain":"4556364607935616"}'
+
+# Retrieve record by ID
+curl http://localhost:3000/mask/<insertedId>
+```
+
+---
+
+## Notes
+
+- MongoDB connection pooling is managed automatically.
+- All timestamps (`created_at`) are numeric UNIX epoch values in milliseconds.
+- Works seamlessly in both local and Vercel serverless environments.
+- Ensure your MongoDB cluster is accessible from your deployment region.
+
+---
 
 ## License
+MIT License. You are free to use, modify, and distribute this code.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+## Author
+
+**Brayan Cepeda**  
+Software Engineer | Backend & Cloud Specialist  
+[LinkedIn](https://www.linkedin.com/in/brayan-rivera-cepeda-65a273139)  NestJS, FastAPI, Pulumi, GCP, AWS, Web3

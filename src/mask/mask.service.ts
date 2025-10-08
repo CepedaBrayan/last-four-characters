@@ -45,13 +45,46 @@ export class MaskService {
     }
   }
 
+  async findInCache(
+    originalChain: string,
+  ): Promise<{ insertedId: string; maskedChain: string } | null> {
+    try {
+      const db = await this.mongoService.getDb();
+
+      const record = await db
+        .collection(this.collectionName)
+        .findOne(
+          { original_chain: originalChain },
+          { projection: { _id: 1, masked_chain: 1 } },
+        );
+
+      if (!record) {
+        this.log.debug(`No cache entry found for chain ${originalChain}`);
+        return null;
+      }
+
+      const foundId = String(record._id);
+      const maskedChain = String(record.masked_chain ?? '');
+
+      this.log.debug(
+        `Cache hit for chain ${originalChain}, found id ${foundId}`,
+      );
+      return { insertedId: foundId, maskedChain };
+    } catch (error) {
+      const msg =
+        error instanceof Error ? error.message : JSON.stringify(error);
+      this.log.error(`Failed to check cache: ${msg}`);
+      throw error;
+    }
+  }
+
   async findByInsertedId(
     insertedId: string,
   ): Promise<GetMaskResponseDto | null> {
     try {
       const db = await this.mongoService.getDb();
       if (!ObjectId.isValid(insertedId)) {
-        this.log.warn(`⚠️ Invalid ObjectId format: ${insertedId}`);
+        this.log.warn(`Invalid ObjectId format: ${insertedId}`);
         return null;
       }
 
@@ -60,11 +93,11 @@ export class MaskService {
         .findOne({ _id: new ObjectId(insertedId) }, { projection: { _id: 0 } });
 
       if (!record) {
-        this.log.warn(`⚠️ No record found for id: ${insertedId}`);
+        this.log.warn(`No record found for id: ${insertedId}`);
         return null;
       }
 
-      this.log.debug(`✅ Found record for id: ${insertedId}`);
+      this.log.debug(`Found record for id: ${insertedId}`);
       return new GetMaskResponseDto(
         String(record.internal_id ?? 'unknown-internal-id'),
         String(record.ip ?? 'unknown-ip'),
@@ -75,7 +108,7 @@ export class MaskService {
     } catch (error) {
       const msg =
         error instanceof Error ? error.message : JSON.stringify(error);
-      this.log.error(`💥 Failed to find record by id ${insertedId}: ${msg}`);
+      this.log.error(`Failed to find record by id ${insertedId}: ${msg}`);
       throw error;
     }
   }

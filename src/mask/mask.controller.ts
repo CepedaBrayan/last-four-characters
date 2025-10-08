@@ -29,17 +29,26 @@ export class MaskController {
     @Body() createMaskDto: CreateMaskDto,
     @Req() req: Request,
   ): Promise<CreateMaskResponseDto> {
+    const originalChain = createMaskDto.chain;
     const ip =
       (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
       'unknown-ip-address';
-    const originalChain = createMaskDto.chain;
-    const maskedChain = this.maskService.maskify(originalChain);
 
-    const insertedId = await this.maskService.saveMaskedChain(
-      ip,
-      originalChain,
-      maskedChain,
-    );
+    const cached = await this.maskService.findInCache(originalChain);
+    let insertedId: string;
+    let maskedChain: string;
+
+    if (cached) {
+      insertedId = cached.insertedId;
+      maskedChain = cached.maskedChain;
+    } else {
+      maskedChain = this.maskService.maskify(originalChain);
+      insertedId = await this.maskService.saveMaskedChain(
+        ip,
+        originalChain,
+        maskedChain,
+      );
+    }
     return new CreateMaskResponseDto(originalChain, maskedChain, insertedId);
   }
 

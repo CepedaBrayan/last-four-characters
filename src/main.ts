@@ -13,7 +13,11 @@ async function bootstrap() {
     .setVersion('1.0.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('api', app, document);
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+
+bootstrap().catch((err) => {
+  console.error('Nest application failed to start:', err);
+  process.exit(1);
+});

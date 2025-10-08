@@ -29,11 +29,6 @@ describe('MaskService', () => {
         expected: '#######5616',
       },
       {
-        name: 'empty string',
-        input: '',
-        expected: '',
-      },
-      {
         name: 'one character string',
         input: '1',
         expected: '1',

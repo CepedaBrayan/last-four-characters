@@ -1,47 +1,63 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { Db, MongoClient } from 'mongodb';
 
 @Injectable()
-export class MongoService implements OnModuleInit {
-  private client!: MongoClient;
-  private db!: Db;
-  private dbName: string;
+export class MongoService implements OnModuleInit, OnModuleDestroy {
+  private static readonly DEFAULT_DB_NAME = 'atlas-maskify';
+  private static readonly POOL_CONFIG = { maxPoolSize: 5, minPoolSize: 1 };
+
+  private client: MongoClient | null = null;
+  private db: Db | null = null;
+  private readonly dbName: string;
+  private readonly log = new Logger(MongoService.name);
 
   constructor() {
-    this.dbName = process.env.MONGODB_NAME || 'atlas-maskify';
+    this.dbName = process.env.MONGODB_NAME || MongoService.DEFAULT_DB_NAME;
   }
 
   async onModuleInit(): Promise<void> {
-    this.client = await this.getMongoClient();
-    this.db = this.client.db(this.dbName);
+    try {
+      this.client = await this.createClient();
+      this.db = this.client.db(this.dbName);
+      this.log.log(`MongoDB connected [db=${this.dbName}]`);
+    } catch (error) {
+      this.log.error(
+        `Failed to initialize MongoDB: ${(error as Error).message}`,
+      );
+      throw error;
+    }
   }
 
-  async getMongoClient(): Promise<MongoClient> {
+  private async createClient(): Promise<MongoClient> {
     if (this.client) return this.client;
-
-    const mongoUri = process.env.MONGODB_URI;
-    if (!mongoUri) {
-      const env = process.env.ENV || 'unknown';
+    const uri = process.env.MONGODB_URI;
+    if (!uri) {
       throw new Error(
-        `❌ Missing MONGODB_URI environment variable.
-          Current environment: ${env}.
-          Make sure it's set in .env (local) or provided by Vercel integration.`,
+        'Missing MONGODB_URI environment variable. ' +
+          'Provide it in .env or your deployment environment.',
       );
     }
-
-    this.client = new MongoClient(mongoUri, {
-      maxPoolSize: 5,
-      minPoolSize: 1,
-    });
-
-    await this.client.connect();
-    return this.client;
+    const client = new MongoClient(uri, MongoService.POOL_CONFIG);
+    await client.connect();
+    return client;
   }
 
   async getDb(): Promise<Db> {
     if (this.db) return this.db;
-    const c = await this.getMongoClient();
-    this.db = c.db(this.dbName);
+    this.client = await this.createClient();
+    this.db = this.client.db(this.dbName);
     return this.db;
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    if (this.client) {
+      await this.client.close();
+      this.log.log('MongoDB connection closed');
+    }
   }
 }
