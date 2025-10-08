@@ -1,51 +1,63 @@
 # Last-Four-Characters API
 
-A simple and efficient **NestJS backend** that masks all but the last four characters of any string.  
-It includes an **in-memory cache using MongoDB** to avoid recomputation and exposes **Swagger API docs**.
+A lightweight and efficient **NestJS backend service** that masks all but the last four characters of any input string.  
+The application integrates with **MongoDB Atlas** for persistence and caching, and exposes interactive API documentation through **Swagger**.
+
+---
+
+## Overview
+
+This service provides two main endpoints:
+1. `POST /mask` – Masks an input string and stores the result in MongoDB (cached to avoid recomputation).
+2. `GET /mask/{insertedId}` – Retrieves a previously masked record by its MongoDB identifier.
+
+The system uses MongoDB as a caching layer. If the same input is submitted more than once, the service returns the same record identifier, demonstrating cache efficiency.
 
 ---
 
 ## Features
 
-- Mask any input string, leaving only the last 4 visible.  
-- Caches previous results in MongoDB (acts like a NoSQL key-value cache).  
-- If you send the same string twice → the same MongoDB record ID is returned.  
-- Swagger documentation auto-generated with NestJS decorators. 
+- Mask any input string, leaving only the last four visible characters.
+- Cache previous computations in MongoDB to prevent redundant operations.
+- Consistent identifiers for identical input values.
+- Automatically generated API documentation via Swagger.
+- Connection pooling and error handling for database operations.
+- Deployable on [Vercel](https://vercel.com) using serverless functions.
 
 ---
 
-## Tech Stack
+## Technology Stack
 
-| Layer | Tool |
-|-------|------|
+| Layer | Technology |
+|--------|-------------|
 | Framework | [NestJS](https://nestjs.com) |
 | Language | TypeScript |
 | Database | MongoDB Atlas |
 | Deployment | Vercel (Serverless Functions) |
-| API Docs | Swagger / OpenAPI |
+| API Documentation | Swagger / OpenAPI |
 
 ---
 
-## ⚙️ Local Setup
+## Local Setup
 
-### 1️⃣ Clone the repo
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/<your-username>/last-four-characters.git
 cd last-four-characters
 ```
 
-### 2️⃣ Install dependencies
+### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-### 3️⃣ Configure environment variables
+### 3. Configure Environment Variables
 Copy the example file:
 ```bash
 cp .env.example .env
 ```
 
-Then edit `.env` with your MongoDB credentials:
+Then edit `.env` with your MongoDB configuration:
 ```env
 # .env
 ENV=local
@@ -55,98 +67,108 @@ MONGODB_URI=<your-mongodb-connection-string>
 MONGODB_MASK_COLLECTION=<your-collection-name>
 ```
 
-### 4️⃣ Run the app
+### 4. Start the Application
 ```bash
 npm run start:dev
 ```
 
-You should see:
+Expected output:
 ```
-✅ Connected to MongoDB: <your-database-name>
-🚀 App running on port 3000
+Connected to MongoDB: <your-database-name>
+App running on port 3000
 ```
 
 ---
 
-## 📘 API Documentation (Swagger)
+## API Documentation (Swagger)
 
-Once the server is running, open your browser at:
+Once running locally, Swagger UI is available at:
 
-👉 [http://localhost:3000/docs](http://localhost:3000/docs)
+**http://localhost:3000/docs**
 
-You’ll see a full Swagger UI where you can:
-- Test both endpoints (`POST /mask` and `GET /mask/{insertedId}`)
-- See example requests/responses
-- Try different strings interactively
+This provides a fully interactive API interface where you can:
+- Test `POST /mask` and `GET /mask/{insertedId}` endpoints.
+- Review example requests and responses.
+- Inspect request validation rules and response schemas.
 
 ---
 
-## API Flow
+## Deployed API (Vercel)
 
-### 1️⃣ **Create a masked record**
-**Endpoint:** `POST /mask`  
-**Body:**
-```json
-{
-  "chain": "4556364607935616"
-}
+The production deployment is hosted on Vercel:
+
+**Base URL:**  
+[https://last-four-characters.vercel.app](https://last-four-characters.vercel.app)
+
+**Swagger UI:**  
+[https://last-four-characters.vercel.app/api](https://last-four-characters.vercel.app/api)
+
+### Example Requests
+
+#### 1. Create a Masked Record
+**POST** `/mask`
+```bash
+curl -X POST https://last-four-characters.vercel.app/mask   -H "Content-Type: application/json"   -d '{"chain":"4556364607935616"}'
 ```
 
-**Response:**
+**Response**
 ```json
 {
   "original": "4556364607935616",
   "masked": "############5616",
-  "insertedId": "random-mongodb-object-id"
+  "insertedId": "67068d5b2f79a8a72a0e16fb"
 }
 ```
 
-**What happens under the hood:**
-- The service checks MongoDB for an existing record with the same `original_chain`.
-- If found, it reuses the existing record and returns it.
-- If not found, it creates a new masked record, saves it, and returns it.
+If the same string is sent again, the same `insertedId` will be returned (cache hit).
 
-Try sending the **same string again** — you’ll notice you get **the same `insertedId`**, proving the cache works.
-
----
-
-### 2️⃣ **Retrieve a masked record**
-**Endpoint:** `GET /mask/{insertedId}`  
-
-Example:
-```
-GET /mask/67068d5b2f79a8a72a0e16fb
+#### 2. Retrieve a Masked Record
+**GET** `/mask/{insertedId}`
+```bash
+curl https://last-four-characters.vercel.app/mask/67068d5b2f79a8a72a0e16fb
 ```
 
-**Response:**
+**Response**
 ```json
 {
-  "internal_id": "random-internal-id",
-  "ip": "random-ip-address",
+  "internal_id": "1728402800000-6d8a5b97-f6d2-4e9e-b27d-c4a2c3de9ed3",
+  "ip": "181.51.78.203",
   "original_chain": "4556364607935616",
   "masked_chain": "############5616",
   "created_at": 1728402800000
 }
 ```
 
-If no record is found for that ID → you’ll get a `404 Not Found`.
+If the record does not exist, a `404 Not Found` response is returned.
 
 ---
 
+## API Flow Summary
 
-## 🧪 Example workflow (quick demo)
+1. **POST /mask**
+   - Checks MongoDB for an existing record by `original_chain`.
+   - If found, returns the same `insertedId` (cache hit).
+   - If not found, creates and stores a new record with a timestamp.
+
+2. **GET /mask/{insertedId}**
+   - Queries MongoDB by ID.
+   - Returns the full record, excluding MongoDB’s internal `_id` field.
+
+---
+
+## Example Workflow
 
 ```bash
-# 1️⃣ Run server
+# Start local server
 npm run start:dev
 
-# 2️⃣ Create a masked record
+# Create a masked record
 curl -X POST http://localhost:3000/mask   -H "Content-Type: application/json"   -d '{"chain":"4556364607935616"}'
 
-# 3️⃣ Hit the same again (cache hit)
+# Repeat request (cache hit)
 curl -X POST http://localhost:3000/mask   -H "Content-Type: application/json"   -d '{"chain":"4556364607935616"}'
 
-# 4️⃣ Use the returned ID in a GET
+# Retrieve record by ID
 curl http://localhost:3000/mask/<insertedId>
 ```
 
@@ -154,18 +176,20 @@ curl http://localhost:3000/mask/<insertedId>
 
 ## Notes
 
-- MongoDB automatically handles connection pooling.
-- All timestamps (`created_at`) are numeric UNIX epoch values (ms).
-- Works both locally and on Vercel’s serverless runtime.
-- For proper local testing, ensure having your mongoDB cluster accessible and your ENV variables set correctly.
+- MongoDB connection pooling is managed automatically.
+- All timestamps (`created_at`) are numeric UNIX epoch values in milliseconds.
+- Works seamlessly in both local and Vercel serverless environments.
+- Ensure your MongoDB cluster is accessible from your deployment region.
 
 ---
 
 ## License
-MIT — free to use, modify, and deploy.  
+MIT License. You are free to use, modify, and distribute this code.
 
 ---
 
-### 🧑‍💻 Author
-Built by **Brayan Cepeda** — Software Engineer & Cloud Enthusiast  
-💼 [LinkedIn](https://www.linkedin.com/in/brayan-rivera-cepeda-65a273139) · Senior Backend Engineer | 7 yoe | @Cashea | NestJS, FastAPI, Pulumi, Web3, GCP, AWS | IELTS C1
+## Author
+
+**Brayan Cepeda**  
+Software Engineer | Backend & Cloud Specialist  
+[LinkedIn](https://www.linkedin.com/in/brayan-rivera-cepeda-65a273139)  NestJS, FastAPI, Pulumi, GCP, AWS, Web3
