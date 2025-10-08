@@ -45,6 +45,39 @@ export class MaskService {
     }
   }
 
+  async findInCache(
+    originalChain: string,
+  ): Promise<{ insertedId: string; maskedChain: string } | null> {
+    try {
+      const db = await this.mongoService.getDb();
+
+      const record = await db
+        .collection(this.collectionName)
+        .findOne(
+          { original_chain: originalChain },
+          { projection: { _id: 1, masked_chain: 1 } },
+        );
+
+      if (!record) {
+        this.log.debug(`No cache entry found for chain ${originalChain}`);
+        return null;
+      }
+
+      const foundId = String(record._id);
+      const maskedChain = String(record.masked_chain ?? '');
+
+      this.log.debug(
+        `✅ Cache hit for chain ${originalChain}, found id ${foundId}`,
+      );
+      return { insertedId: foundId, maskedChain };
+    } catch (error) {
+      const msg =
+        error instanceof Error ? error.message : JSON.stringify(error);
+      this.log.error(`💥 Failed to check cache: ${msg}`);
+      throw error;
+    }
+  }
+
   async findByInsertedId(
     insertedId: string,
   ): Promise<GetMaskResponseDto | null> {
