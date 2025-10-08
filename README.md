@@ -80,6 +80,15 @@ App running on port 3000
 
 ---
 
+## Testing
+
+Unit testes are implemented using Jest. To run tests:
+```bash
+npm run test
+```
+
+Those tests cover just the masking logic, using table-driven tests to ensure correctness over the maskify function (src/mask/mask.service.ts & src/mask/mask.service.spec.ts).
+
 ## API Documentation (Swagger)
 
 Once running locally, Swagger UI is available at:

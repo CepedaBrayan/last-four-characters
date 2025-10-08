@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { ObjectId } from 'mongodb';
-import { MongoService } from 'src/database/mongo.service';
+import { MongoService } from '../database/mongo.service';
 import { GetMaskResponseDto } from './dto/get-mask.dto';
 
 @Injectable()

@@ -1,12 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MongoService } from '../database/mongo.service';
 import { MaskService } from './mask.service';
 
 describe('MaskService', () => {
   let service: MaskService;
 
+  // Minimal mock to satisfy the dependency
+  const mockMongoService = {
+    getDb: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [MaskService],
+      providers: [
+        MaskService,
+        { provide: MongoService, useValue: mockMongoService },
+      ],
     }).compile();
 
     service = module.get<MaskService>(MaskService);
