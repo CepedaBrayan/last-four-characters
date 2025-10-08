@@ -84,7 +84,7 @@ App running on port 3000
 
 Once running locally, Swagger UI is available at:
 
-**http://localhost:3000/docs**
+**http://localhost:3000/api**
 
 This provides a fully interactive API interface where you can:
 - Test `POST /mask` and `GET /mask/{insertedId}` endpoints.
