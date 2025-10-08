@@ -100,9 +100,6 @@ The production deployment is hosted on Vercel:
 **Base URL:**  
 [https://last-four-characters.vercel.app](https://last-four-characters.vercel.app)
 
-**Swagger UI:**  
-[https://last-four-characters.vercel.app/api](https://last-four-characters.vercel.app/api)
-
 ### Example Requests
 
 #### 1. Create a Masked Record
