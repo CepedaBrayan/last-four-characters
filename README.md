@@ -169,6 +169,8 @@ curl -X POST http://localhost:3000/mask   -H "Content-Type: application/json"   
 curl http://localhost:3000/mask/<insertedId>
 ```
 
+You can also use Swagger UI to interact with the API.
+![alt text](swagger-ss.png)
 ---
 
 ## Notes
