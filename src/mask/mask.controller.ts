@@ -8,7 +8,6 @@ import {
   Post,
 } from '@nestjs/common';
 import { CreateMaskDto } from './dto/create-mask.dto';
-import { UpdateMaskDto } from './dto/update-mask.dto';
 import { MaskService } from './mask.service';
 
 @Controller('mask')
@@ -28,11 +27,6 @@ export class MaskController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.maskService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMaskDto: UpdateMaskDto) {
-    return this.maskService.update(+id, updateMaskDto);
   }
 
   @Delete(':id')

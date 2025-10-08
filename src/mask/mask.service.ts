@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMaskDto } from './dto/create-mask.dto';
-import { UpdateMaskDto } from './dto/update-mask.dto';
 
 @Injectable()
 export class MaskService {
@@ -14,10 +13,6 @@ export class MaskService {
 
   findOne(id: number) {
     return `This action returns a #${id} mask`;
-  }
-
-  update(id: number, updateMaskDto: UpdateMaskDto) {
-    return `This action updates a #${id} mask`;
   }
 
   remove(id: number) {
